@@ -1,4 +1,4 @@
-# BTReceiverLED PWM
+# ESP32 Bluetooth Receiver LED PWM
 
 Status indication via RGB LED:
 
