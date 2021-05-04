@@ -1,9 +1,9 @@
-#include <driver/rtc_io.h>
+#include <driver/rtc_io.h>                      
 #include "BluetoothA2DPSink.h"
-#define AUTOCONNECT_TRY_NUM 2
 
 BluetoothA2DPSink a2dp_sink;
 
+RTC_DATA_ATTR int bootCounter = 0;              //Persistent boot counter
 const int freq = 5000;
 const int ledChannelRed = 0;
 const int ledChannelGreen = 1;
@@ -19,7 +19,7 @@ int button_state = 0;
 int ledState = LOW;
 unsigned long currentMillis = 0;
 unsigned long previousMillis = 0;
-const long interval = 200; 
+const long interval = 200;                          //Interval for pulse length
 // -------------------------------------------------------------------------
 // Setup
 // -------------------------------------------------------------------------
@@ -38,10 +38,9 @@ pinMode (ledPinBlue, OUTPUT);
 pinMode (ledPinRed, OUTPUT);
 pinMode(PIN_BUTTON, INPUT_PULLDOWN);
 digitalWrite (ledPinRed, HIGH);
-//digitalWrite (ledInternal, HIGH);
 rtc_gpio_pulldown_en((gpio_num_t)GPIO_NUM_27);                                            //Enables ESP32 pullup or pulldown resistor during deep sleep
 esp_sleep_enable_ext0_wakeup((gpio_num_t)GPIO_NUM_27, RISING);
-
+firstBoot();                                                                                                                    //If first time booting, go directly into sleep (prevents full startup after providing power)
 cycle (ledChannelRed, 0, 200);
 cycle (ledChannelBlue, 0, 200);
 cycle (ledChannelGreen, 0, 200);
@@ -49,9 +48,6 @@ delay(50);
 a2dp_sink.start("BluetoothESP32");
 }
 
-// -------------------------------------------------------------------------
-// Main loop
-// -------------------------------------------------------------------------
 void loop() 
 {
   
@@ -90,6 +86,16 @@ switch (a2dp_sink.get_connection_state()) {
 
       }
       
+}
+
+
+void firstBoot()
+{
+    if (bootCounter == 0)
+    {
+    bootCounter++;
+    esp_deep_sleep_start();
+    }
 }
 
 
